@@ -2,7 +2,7 @@ import streamlit as st
 import uuid
 import os
 import time
-
+from backend.llm_explainer import explain_with_llm
 # -----------------------------
 # PAGE CONFIG (modern look)
 # -----------------------------
@@ -92,6 +92,29 @@ with tab_image:
         )
 
         st.pyplot(fig)
+        
+        import tempfile
+        import cv2
+
+        # Save GradCAM temporarily
+        temp_cam = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+        cv2.imwrite(temp_cam.name, cam_img)
+
+        # evidence = """
+        # Grad-CAM highlights facial regions such as mouth and eyes.
+        # Deepfake images often contain blending artifacts in these areas.
+        # """
+
+        llm_text = explain_with_llm(
+            modality="image",
+            prediction=label,
+            confidence=prob,
+            # evidence=evidence,
+            image_paths=[temp_cam.name]
+        )
+
+        st.markdown("### 🤖 AI Explanation")
+        st.write(llm_text)
 
         os.remove(temp_path)
 
@@ -121,10 +144,26 @@ with tab_audio:
         st.subheader("🔎 Explainability (Audio XAI)")
 
         xai_outputs = explain_audio(temp_path)
+
         st.plotly_chart(xai_outputs["waveform_fig"], use_container_width=True)
         st.plotly_chart(xai_outputs["mfcc_fig"], use_container_width=True)
         st.plotly_chart(xai_outputs["spectral_centroid_fig"], use_container_width=True)
         st.plotly_chart(xai_outputs["zcr_fig"], use_container_width=True)
+
+        llm_text = explain_with_llm(
+        modality="audio",
+        prediction=label,
+        confidence=probs["fake"],
+        # evidence="The following graphs were analyzed to determine if the audio is real or fake.",
+        image_paths=[
+            xai_outputs["mfcc_img"],
+            xai_outputs["spectral_img"],
+            xai_outputs["zcr_img"]
+            ]
+        )
+
+        st.markdown("### 🤖 AI Explanation")
+        st.write(llm_text)
 
         os.remove(temp_path)
 
@@ -164,6 +203,32 @@ with tab_video:
             with cols[i % 3]:
                 st.image(frame, caption=f"Frame {i+1}", width=260)
 
+        import tempfile
+        import cv2
+
+        frame_paths = []
+
+        for frame in cam_frames[:3]:   # only send first 3 frames
+            temp_frame = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+            cv2.imwrite(temp_frame.name, frame)
+            frame_paths.append(temp_frame.name)
+
+        # evidence = """
+        # Grad-CAM highlights facial regions across multiple frames.
+        # Temporal inconsistencies detected between frames.
+        # """
+
+        llm_text = explain_with_llm(
+            modality="video",
+            prediction=label,
+            confidence=prob,
+            # evidence=evidence,
+            image_paths=frame_paths
+        )
+
+        st.markdown("### 🤖 AI Explanation")
+        st.write(llm_text)
+        
         os.remove(temp_path)
 
 # ==========================================================
