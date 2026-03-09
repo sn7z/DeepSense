@@ -30,7 +30,7 @@ Refer to the visual evidence if available.
     contents.append(prompt)
 
     response = client.models.generate_content(
-        model="gemini-3-flash-preview",
+        model="gemini-3.1-flash-lite-preview",
         contents=contents
     )
 
