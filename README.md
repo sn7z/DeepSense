@@ -27,40 +27,40 @@ All results are passed to a **Gemini LLM** which synthesises the prediction, con
 ## System Architecture
 
 ```
- ┌─────────────────────────────────────────────────────────┐
- │                    Streamlit Frontend                   │
- │         (Image / Audio / Video tab interface)           │
- └─────────────────────────────┬───────────────────────────┘
-                               │
-               ┌───────────────┼───────────────┐
-               ▼               ▼               ▼
-         ┌───────────┐  ┌───────────┐  ┌───────────┐
-         │  backend/ │  │  backend/ │  │  backend/ │
-         │  image.py │  │  audio.py │  │  video.py │
-         └─────┬─────┘  └─────┬─────┘  └─────┬─────┘
-               │               │               │
-               ▼               ▼               ▼
-         XceptionNet      CNN+BiLSTM     XceptionNet
-         (Keras .keras)   (Keras .h5)    + LSTM (.keras)
-               │               │               │
-               └───────────────┼───────────────┘
-                              │
-               ┌───────────────┼───────────────┐
-               ▼               ▼               ▼
-         ┌───────────┐  ┌───────────┐  ┌───────────┐
-         │ Grad-CAM  │  │  Spectral │  │ Grad-CAM  │
-         │ (Image)   │  │  XAI      │  │ (Frames)  │
-         └─────┬─────┘  └─────┬─────┘  └─────┬─────┘
-               │               │               │
-               └───────────────┼───────────────┘
-                              ▼
-                     ┌──────────────────┐
-                     │  Gemini LLM API  │
-                     │  (llm_explainer) │
-                     └────────┬─────────┘
-                              ▼
-                     Plain-language forensic
-                     explanation rendered in UI
+            ┌─────────────────────────────────────────────────────────┐
+            │                    Streamlit Frontend                   │
+            │         (Image / Audio / Video tab interface)           │
+            └─────────────────────────────┬───────────────────────────┘
+                                          │
+                          ┌───────────────┼───────────────┐
+                          ▼               ▼               ▼
+                    ┌──────────┐   ┌───────────┐   ┌──────────┐
+                    │ backend/ │   │  backend/ │   │ backend/ │
+                    │ image.py │   │  audio.py │   │ video.py │
+                    └─────┬────┘   └─────┬─────┘   └─────┬────┘
+                          │              │               │
+                          ▼              ▼               ▼
+                    XceptionNet      CNN+BiLSTM     XceptionNet
+                    (Keras .keras)   (Keras .h5)    + LSTM (.keras)
+                          │               │               │
+                          └───────────────┼───────────────┘
+                                          │
+                          ┌───────────────┼───────────────┐
+                          ▼               ▼               ▼
+                    ┌───────────┐   ┌───────────┐   ┌───────────┐
+                    │ Grad-CAM  │   │  Spectral │   │ Grad-CAM  │
+                    │ (Image)   │   │  XAI      │   │ (Frames)  │
+                    └─────┬─────┘   └─────┬─────┘   └─────┬─────┘
+                          │               │               │
+                          └───────────────┼───────────────┘
+                                          ▼
+                                 ┌──────────────────┐
+                                 │  Gemini LLM API  │
+                                 │  (llm_explainer) │
+                                 └────────┬─────────┘
+                                          ▼
+                               Plain-language forensic
+                              Explanation rendered in UI
 ```
 
 ---
