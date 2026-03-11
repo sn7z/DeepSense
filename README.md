@@ -275,16 +275,6 @@ The app will open at `http://localhost:8501`.
 | 🎵 Audio | WAV, MP3 |
 | 🎥 Video | MP4, AVI, MOV |
 
----
-
-## How It Works — End to End
-
-1. **Upload** a media file via the Streamlit interface
-2. The file is **preprocessed** and passed to the relevant deep learning model
-3. A **prediction** (REAL / FAKE) and confidence score are returned
-4. **Explainability** is generated — Grad-CAM overlays for image/video, spectral graphs for audio
-5. The prediction, confidence, and visual evidence are sent to **Gemini LLM**
-6. A plain-language **forensic explanation** is displayed alongside the results
 
 ---
 
