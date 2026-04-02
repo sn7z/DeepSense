@@ -3,6 +3,9 @@ import os
 import time
 import streamlit as st
 import threading
+import io
+
+
 
 # -----------------------------
 # RATE LIMIT SETTINGS
@@ -73,7 +76,7 @@ Refer to the visual evidence if available.
     contents = []
 
     for path in image_paths:
-        uploaded_file = client.files.upload(file=path)
+        uploaded_file = client.files.upload(file=io.BytesIO(img_bytes))
         contents.append(uploaded_file)
 
     contents.append(prompt)
