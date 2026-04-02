@@ -75,15 +75,20 @@ Refer to the visual evidence if available.
 
     contents = []
 
-    for path in image_paths:
-        uploaded_file = client.files.upload(file=io.BytesIO(img_bytes))
-        contents.append(uploaded_file)
+    for img_bytes in image_paths:
+        uploaded_file = client.files.upload(
+            file=io.BytesIO(img_bytes)
+        )
+    contents.append(uploaded_file)
 
     contents.append(prompt)
 
-    response = client.models.generate_content(
-        model="gemini-3.1-flash-lite-preview",
-        contents=contents
-    )
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.1-flash-lite-preview",
+            contents=contents
+        )
+        return response.text
 
-    return response.text
+    except Exception as e:
+        return f"⚠️ Error generating explanation: {str(e)}"
