@@ -4,7 +4,7 @@ altair         # used by plotly/visualisation
 audioread
 librosa
 mtcnn
-opencv-python   # provides cv2
+opencv-python-headless   # provides cv2
 plotly
 kaleido
 matplotlib
