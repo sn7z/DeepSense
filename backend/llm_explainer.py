@@ -67,7 +67,7 @@ You are an AI forensic analyst helping users understand deepfake detection resul
 
 Media Type: {modality}
 Prediction: {prediction}
-Confidence: {confidence:.2f}
+Fake Prediction probability/Confidence: {confidence:.2f}
 
 Explain clearly in simple language WHY the media might be {prediction}.
 Refer to the visual evidence if available.
