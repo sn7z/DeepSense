@@ -2,14 +2,16 @@ import librosa
 import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
+import tempfile
+import os
 
-
-# -------------------------------
-# Convert Plot → Image Bytes (NO FILES, NO CHROME)
-# -------------------------------
 def save_fig(fig):
     img_bytes = pio.to_image(fig, format="png")
-    return img_bytes
+    tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+    tmp.write(img_bytes)
+    tmp.flush()
+    tmp.close()
+    return tmp.name
 
 
 # -------------------------------
