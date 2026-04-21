@@ -3,7 +3,6 @@ import os
 import time
 import streamlit as st
 import threading
-import io
 
 # -----------------------------
 # RATE LIMIT SETTINGS
@@ -68,7 +67,7 @@ You are an AI forensic analyst helping users understand deepfake detection resul
 
 Media Type: {modality}
 Prediction: {prediction}
-Confidence: {confidence:.2f}
+Fake Prediction probability/Confidence: {confidence:.2f}
 
 Explain clearly in simple language WHY the media might be {prediction}.
 Refer to the visual evidence if available.
@@ -77,19 +76,43 @@ Refer to the visual evidence if available.
     contents = []
 
     # -----------------------------
-    # HANDLE IMAGE PATHS — read bytes from disk
+    # UPLOAD IMAGE FILES (paths → bytes)
     # -----------------------------
     for img_path in image_paths:
-        # img_path is a file path string (e.g. /tmp/xxx.png)
-        # Read the file bytes before uploading to Gemini
-        with open(img_path, "rb") as f:
-            img_bytes = f.read()
+        if not img_path or not os.path.exists(img_path):
+            continue
+        try:
+            # Determine mime type from extension
+            ext = os.path.splitext(img_path)[1].lower()
+            mime_map = {
+                ".png":  "image/png",
+                ".jpg":  "image/jpeg",
+                ".jpeg": "image/jpeg",
+                ".webp": "image/webp",
+            }
+            mime_type = mime_map.get(ext, "image/png")
 
-        uploaded_file = client.files.upload(
-            file=io.BytesIO(img_bytes),
-            config={"mime_type": "image/png"}
-        )
-        contents.append(uploaded_file)
+            with open(img_path, "rb") as f:
+                image_bytes = f.read()
+
+            # Use the upload API correctly — config dict avoids kwarg issues
+            # across different google-genai SDK minor versions
+            uploaded_file = client.files.upload(
+                path=img_path,
+                config={"mime_type": mime_type},
+            )
+            contents.append(uploaded_file)
+        except TypeError:
+            # Fallback for older SDK versions that don't support config=
+            import io
+            from google.genai import types
+            with open(img_path, "rb") as f:
+                image_bytes = f.read()
+            part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
+            contents.append(part)
+        except Exception:
+            # Skip unreadable files silently
+            continue
 
     contents.append(prompt)
 
